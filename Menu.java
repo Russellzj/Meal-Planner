@@ -8,6 +8,7 @@ public class Menu {
     private String[] ingredients;
 
     public void add() {
+
         Scanner sc = new Scanner(System.in);
         System.out.println("Which meal do you want to add (breakfast, lunch, dinner)?");
         meal = sc.nextLine();
