@@ -14,6 +14,7 @@ public class Menu {
         List<String> mealOptions = List.of("breakfast", "lunch", "dinner");
         System.out.println("Which meal do you want to add (breakfast, lunch, dinner)?");
         String mealChoice;
+        //Loop makes sure that the category chosen is from the acceptable list mealOptions
         do {
             mealChoice = sc.next().toLowerCase();
             if (!mealOptions.contains(mealChoice)) {
@@ -22,11 +23,19 @@ public class Menu {
                 category = mealChoice;
             }
         } while (!mealOptions.contains(mealChoice));
-        category = sc.nextLine().toLowerCase();
+        sc.nextLine();
+
         System.out.println("Input the meal's name: ");
         mealName = sc.nextLine();
+        String newIngredient;
         System.out.println("Input the ingredients:");
-        ingredients = sc.nextLine().split(", ");
+        //Loops makes sure that there is no special characters or numbers in the ingredient list
+        do {
+            newIngredient = sc.nextLine();
+            if (!newIngredient.matches("[a-zA-Z, ]+"))
+                System.out.println("Wrong format. Use letters only!");
+        } while (!newIngredient.matches("[a-zA-Z, ]+"));
+        ingredients = newIngredient.split(", ");
         System.out.println("The meal has been added!");
     }
 
