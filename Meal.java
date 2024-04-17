@@ -3,7 +3,7 @@ package mealplanner;
 import java.util.List;
 import java.util.Scanner;
 
-public class Menu {
+public class Meal {
     private String category;
     private String mealName;
     private String[] ingredients;
@@ -39,12 +39,9 @@ public class Menu {
         System.out.println("The meal has been added!");
     }
 
-    public void printMeal() {
-        System.out.println("Category: " + category);
-        System.out.println("Name: " + mealName);
-        System.out.println("Ingredients:");
-        for (String ingredient : ingredients) {
-            System.out.println(ingredient);
-        }
+    @Override
+    public String toString() {
+        return String.format("Category: %s\nName: %s\nIngredients:\n%s",
+                category, mealName, String.join("\n", ingredients));
     }
 }
