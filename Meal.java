@@ -11,30 +11,42 @@ public class Meal {
     public void add() {
 
         Scanner sc = new Scanner(System.in);
+
+        //Chooses meal category
         List<String> mealOptions = List.of("breakfast", "lunch", "dinner");
         System.out.println("Which meal do you want to add (breakfast, lunch, dinner)?");
         String mealChoice;
-        //Loop makes sure that the category chosen is from the acceptable list mealOptions
+        //Makes sure that the category chosen is from the acceptable list mealOptions
         do {
-            mealChoice = sc.next().toLowerCase();
+            mealChoice = sc.nextLine().toLowerCase();
             if (!mealOptions.contains(mealChoice)) {
                 System.out.println("Wrong meal category! Choose from: breakfast, lunch, dinner.");
             } else {
                 category = mealChoice;
             }
         } while (!mealOptions.contains(mealChoice));
-        sc.nextLine();
 
+        //Adds meal name to meal
         System.out.println("Input the meal's name: ");
-        mealName = sc.nextLine();
+        String mealName;
+        do {
+            mealName = sc.nextLine();
+            if (!mealName.matches("[a-zA-Z ]+")) {
+                System.out.println("Wrong format. Use letters only!");
+            } else {
+                this.mealName = mealName;
+            }
+        } while (!mealName.matches("[a-zA-Z ]+"));
+        //Add Ingredients to meal
         String newIngredient;
         System.out.println("Input the ingredients:");
         //Loops makes sure that there is no special characters or numbers in the ingredient list
+        String regexIngredient = "[a-z]+(?: +[a-z]+)?(?: *, *[a-z]+(?: +[a-z]+)?)*";
         do {
             newIngredient = sc.nextLine();
-            if (!newIngredient.matches("[a-zA-Z, ]+"))
+            if (!newIngredient.matches(regexIngredient))
                 System.out.println("Wrong format. Use letters only!");
-        } while (!newIngredient.matches("[a-zA-Z, ]+"));
+        } while (!newIngredient.matches(regexIngredient));
         ingredients = newIngredient.split(", ");
         System.out.println("The meal has been added!");
     }

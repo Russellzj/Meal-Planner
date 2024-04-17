@@ -10,8 +10,8 @@ public class Main {
         ArrayList<Meal> menu = new ArrayList<>();
         boolean continueInput = true; //continues the loop as long as the user does not want to exit
         while (continueInput) {
-            System.out.println("Would you like to do(add, show exit)?");
-            String userCommand  = sc.next();
+            System.out.println("What would you like to do (add, show, exit)?");
+            String userCommand  = sc.nextLine();
             switch (userCommand) {
                 //Adds Meal to the menu
                 case "add":
@@ -20,17 +20,22 @@ public class Main {
                     menu.get(menu.size()-1).add();
                     break;
                 case "show":
-                    System.out.println();
-                    for (Meal meal : menu) {
-                        System.out.println(meal);
+                    if (menu.isEmpty()) {
+                        System.out.println("No meals saved. Add a meal first.");
+                    } else {
                         System.out.println();
+                        for (Meal meal : menu) {
+                            System.out.println(meal);
+                            System.out.println();
+                        }
                     }
+
                     break;
                 case "exit":
                     continueInput = false;
                     break;
                 default:
-                    System.out.println("Invalid command");
+                    //System.out.println("Invalid command");
             }
         } System.out.println("Bye!");
     }
