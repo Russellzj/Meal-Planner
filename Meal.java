@@ -41,7 +41,7 @@ public class Meal {
         String newIngredient;
         System.out.println("Input the ingredients:");
         //Loops makes sure that there is no special characters or numbers in the ingredient list
-        String regexIngredient = "[a-z]+(?: +[a-z]+)?(?: *, *[a-z]+(?: +[a-z]+)?)*";
+        String regexIngredient = "[a-zA-Z]+( *, *[a-zA-Z]+( +[a-zA-Z]+)*)*";
         do {
             newIngredient = sc.nextLine();
             if (!newIngredient.matches(regexIngredient))
