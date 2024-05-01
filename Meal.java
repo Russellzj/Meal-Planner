@@ -12,12 +12,17 @@ public class Meal {
 
     //private ArrayListString[] ingredients;
 
-    public void add(String category, String mealName, List<String> ingredients) {
+    Meal(String category, String mealName, List<String> ingredients) {
         this.category = category;
         this.mealName = mealName;
         this.ingredients = ingredients;
         this.newData = false;
     }
+
+    public Meal() {
+        this.newData = true;
+    }
+
     public void addInput() {
 
         Scanner sc = new Scanner(System.in);
@@ -62,7 +67,6 @@ public class Meal {
         for (String ingredient : ingredientArray) {
             ingredients.add(ingredient);
         }
-        newData = true;
         System.out.println("The meal has been added!");
     }
 
