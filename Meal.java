@@ -1,14 +1,38 @@
 package mealplanner;
 
+<<<<<<< HEAD
+=======
+import java.util.ArrayList;
+>>>>>>> database_creation
 import java.util.List;
 import java.util.Scanner;
 
 public class Meal {
     private String category;
     private String mealName;
+<<<<<<< HEAD
     private String[] ingredients;
 
     public void add() {
+=======
+    List<String> ingredients = new ArrayList<>();
+    boolean newData;
+
+    //private ArrayListString[] ingredients;
+
+    Meal(String category, String mealName, List<String> ingredients) {
+        this.category = category;
+        this.mealName = mealName;
+        this.ingredients = ingredients;
+        this.newData = false;
+    }
+
+    public Meal() {
+        this.newData = true;
+    }
+
+    public void addInput() {
+>>>>>>> database_creation
 
         Scanner sc = new Scanner(System.in);
 
@@ -41,13 +65,25 @@ public class Meal {
         String newIngredient;
         System.out.println("Input the ingredients:");
         //Loops makes sure that there is no special characters or numbers in the ingredient list
+<<<<<<< HEAD
         String regexIngredient = "[a-zA-Z]+( *, *[a-zA-Z]+( +[a-zA-Z]+)*)*";
+=======
+        String regexIngredient = "[a-z]+(?: +[a-z]+)?(?: *, *[a-z]+(?: +[a-z]+)?)*";
+>>>>>>> database_creation
         do {
             newIngredient = sc.nextLine();
             if (!newIngredient.matches(regexIngredient))
                 System.out.println("Wrong format. Use letters only!");
         } while (!newIngredient.matches(regexIngredient));
+<<<<<<< HEAD
         ingredients = newIngredient.split(", ");
+=======
+        String[] ingredientArray = newIngredient.split(", ");
+        //ingredients = newIngredient.split(", ");
+        for (String ingredient : ingredientArray) {
+            ingredients.add(ingredient);
+        }
+>>>>>>> database_creation
         System.out.println("The meal has been added!");
     }
 
@@ -56,4 +92,23 @@ public class Meal {
         return String.format("Category: %s\nName: %s\nIngredients:\n%s",
                 category, mealName, String.join("\n", ingredients));
     }
+<<<<<<< HEAD
+=======
+
+    public String getCategory() {
+        return category;
+    }
+
+    public String getMealName() {
+        return mealName;
+    }
+
+    public List<String> getIngredients() {
+        return ingredients;
+    }
+
+    public boolean isNewData() {
+        return newData;
+    }
+>>>>>>> database_creation
 }
