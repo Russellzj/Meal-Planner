@@ -57,12 +57,9 @@ public class Main {
                 default:
                     //System.out.println("Invalid command");
             }
-<<<<<<< HEAD
-        } System.out.println("Bye!");
-=======
+
         }
         System.out.println("Bye!");
         database.addDataToDatabase(menu);
->>>>>>> database_creation
     }
 }

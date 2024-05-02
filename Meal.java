@@ -1,9 +1,6 @@
 package mealplanner;
 
-<<<<<<< HEAD
-=======
 import java.util.ArrayList;
->>>>>>> database_creation
 import java.util.List;
 import java.util.Scanner;
 
@@ -66,7 +63,8 @@ public class Meal {
         } while (!newIngredient.matches(regexIngredient));
 
         String[] ingredientArray = newIngredient.split(", ");
-        //ingredients = newIngredient.split(", ");
+        ingredients = new ArrayList<>();
+
         for (String ingredient : ingredientArray) {
             ingredients.add(ingredient);
         }
