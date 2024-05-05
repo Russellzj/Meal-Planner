@@ -80,6 +80,24 @@ public class Database {
                 totalMeals++;
             }
         }
+    }
 
+    public void printAllMeals() throws SQLException {
+        //List<Meal> menu = new ArrayList<>();
+        Statement statementForMeals = createConnection();
+        Statement statementForIngredients = createConnection();
+        ResultSet resultSet = statementForMeals.executeQuery("SELECT * FROM meals");
+        while (resultSet.next()) {
+            System.out.printf("Category: %s\nName: %s\n",
+                    resultSet.getString("category"), resultSet.getString("meal"));
+            //Retrieves and prints the meal's ingredients based on its meal ID
+            System.out.println("Ingredients: ");
+            ResultSet ingredients = statementForIngredients.executeQuery("SELECT * FROM ingredients WHERE meal_id = " +
+                    resultSet.getInt("meal_id"));
+            while (ingredients.next()) {
+                System.out.println(ingredients.getString("ingredient"));
+            }
+            System.out.println();
+        }
     }
 }
