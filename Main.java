@@ -16,6 +16,8 @@ public class Main {
         Database database = new Database("meals_db", DB_USER, DB_PASSWORD);
         //database.deleteTable("meals");
         //database.deleteTable("ingredients");
+
+        //Creates table for meals and ingredients if none exists
         database.creatTable("IF NOT EXISTS meals (" +
                 "category VARCHAR(10)," +
                 "meal VARCHAR(20)," +
@@ -24,32 +26,24 @@ public class Main {
                 "ingredient VARCHAR(20)," +
                 "ingredient_id INTEGER PRIMARY KEY," +
                 "meal_id INTEGER)");
-        List<Meal> menu = database.getMeals();
 
-        Scanner sc = new Scanner(System.in);
-        //ArrayList to hold all meals created
+
         boolean continueInput = true; //continues the loop as long as the user does not want to exit
+
         while (continueInput) {
+            Scanner sc = new Scanner(System.in);
             System.out.println("What would you like to do (add, show, exit)?");
             String userCommand  = sc.nextLine();
             switch (userCommand) {
                 //Adds Meal to the menu
                 case "add":
                     Meal newMeal = new Meal();
-                    menu.add(newMeal);
-                    menu.get(menu.size()-1).addInput();
+                    newMeal.addInput();
+                    database.addSingleMealToDatabase(newMeal);
                     break;
                 case "show":
-                    if (menu.isEmpty()) {
-                        System.out.println("No meals saved. Add a meal first.");
-                    } else {
-                        System.out.println();
-                        for (Meal meal : menu) {
-                            System.out.println(meal);
-                            System.out.println();
-                        }
-                    }
-
+                    database.printMealsByCategory();
+                    //if (database.getTotalMeals() == 0)
                     break;
                 case "exit":
                     continueInput = false;
@@ -57,9 +51,8 @@ public class Main {
                 default:
                     //System.out.println("Invalid command");
             }
-
         }
         System.out.println("Bye!");
-        database.addDataToDatabase(menu);
+        //database.addMultipleMealsToDatabase(menu);
     }
 }
