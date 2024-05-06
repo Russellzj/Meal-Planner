@@ -23,16 +23,19 @@ public class Database {
         return stmt;
     }
 
+    //Retrieves total meals
     public int getTotalMeals(){
         return totalMeals;
     }
 
+    //Creates a table in the database
     public void creatTable(String tableSpecs) throws SQLException {
         Statement statement = createConnection();
         statement.executeUpdate("CREATE TABLE " + tableSpecs);
         //System.out.println("Creating table");
     }
 
+    //Removes a table from the database
     public void deleteTable(String table) throws SQLException {
         Statement statement = createConnection();
         statement.executeUpdate("DROP TABLE " + table);
@@ -63,6 +66,7 @@ public class Database {
         return menu;
     }
 
+    //Retrieves the highest value used from meals - Used mainly for creating the primary key
     public void getLastMealID() throws SQLException {
         Statement statement = createConnection();
         ResultSet lastMealID =
@@ -72,7 +76,7 @@ public class Database {
         }
     }
 
-
+    //Retrieves the highest value used from ingredients - Used mainly for creating the primary key
     public void getLastIngredientID() throws SQLException {
         Statement statement = createConnection();
         ResultSet lastIngredientID =
@@ -82,24 +86,26 @@ public class Database {
         }
     }
 
+    @Deprecated
+    //Adds multiple meals to the database from a List
     public void addMultipleMealsToDatabase(List<Meal> menu) throws SQLException {
         Statement statement = createConnection();
         getLastMealID();
         getLastIngredientID();
         totalMeals++;
         for (Meal meal : menu) {
-            if (meal.isNewData()) {
-                statement.executeUpdate("INSERT INTO meals VALUES ('%s', '%s', '%d')".formatted(
-                        meal.getCategory(), meal.getMealName(), totalMeals));
-                for(String ingredient : meal.getIngredients()) {
-                    statement.executeUpdate("INSERT INTO ingredients VALUES ('%s', '%d', %d)".formatted(
-                            ingredient, ++totalIngredients, totalMeals));
-                }
-                totalMeals++;
+            statement.executeUpdate("INSERT INTO meals VALUES ('%s', '%s', '%d')".formatted(
+                    meal.getCategory(), meal.getMealName(), totalMeals));
+            for(String ingredient : meal.getIngredients()) {
+                statement.executeUpdate("INSERT INTO ingredients VALUES ('%s', '%d', %d)".formatted(
+                        ingredient, ++totalIngredients, totalMeals));
             }
+            totalMeals++;
+
         }
     }
 
+    //Adds a single meal to the database
     public void addSingleMealToDatabase(Meal meal) throws SQLException {
         getLastMealID();
         getLastIngredientID();

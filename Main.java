@@ -23,7 +23,7 @@ public class Main {
                 "meal VARCHAR(20)," +
                 "meal_id INTEGER PRIMARY KEY)");
         database.creatTable("IF NOT EXISTS ingredients (" +
-                "ingredient VARCHAR(20)," +
+                "ingredient VARCHAR(50)," +
                 "ingredient_id INTEGER PRIMARY KEY," +
                 "meal_id INTEGER)");
 
@@ -43,7 +43,6 @@ public class Main {
                     break;
                 case "show":
                     database.printMealsByCategory();
-                    //if (database.getTotalMeals() == 0)
                     break;
                 case "exit":
                     continueInput = false;
@@ -53,6 +52,5 @@ public class Main {
             }
         }
         System.out.println("Bye!");
-        //database.addMultipleMealsToDatabase(menu);
     }
 }
