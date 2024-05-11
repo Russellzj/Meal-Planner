@@ -3,19 +3,27 @@ package mealplanner;
 import java.util.*;
 import java.sql.*;
 
-public class Database {
-    private String DB_URL;
-    private String DB_USER;
-    private String DB_PASSWORD;
+public class Database implements MealDao {
+    private static final String DB_URL = "jdbc:postgresql:meals_db";
+    private String DB_USER = "postgres";
+    private String DB_PASSWORD = "1111";
+    private static final String mealsTable = "CREATE TABLE IF NOT EXISTS meals (" +
+            "category VARCHAR(10),\" +\n" +
+            "meal VARCHAR(20)," +
+            "meal_id INTEGER PRIMARY KEY)";
+    private static final String ingredientsTable = "CREATE TABLE IF NOT EXISTS ingredients (" +
+            "ingedient Varchar(10)," +
+            "ingredient_id INTEGER PRIMARY KEY," +
+            "meal_id INTEGER)";
+    private static final List<String> mealOptions = List.of("breakfast", "lunch", "dinner");
     private int totalIngredients = 0;
     private int totalMeals = 0;
 
-    public Database(String databaseName, String DB_USER, String DB_PASSWORD) throws SQLException {
-        this.DB_URL = "jdbc:postgresql:" + databaseName;
-        this.DB_USER = DB_USER;
-        this.DB_PASSWORD = DB_PASSWORD;
+    public Database() {
+        createTables();
     }
 
+    //Creates connection to the database
     private Statement createConnection() throws SQLException {
         Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
         connection.setAutoCommit(true);
@@ -23,23 +31,34 @@ public class Database {
         return stmt;
     }
 
+    //Creates a table in the database
+    public void createTables() {
+        try (Statement statement = createConnection()) {
+            statement.executeUpdate(mealsTable);
+            statement.executeUpdate(ingredientsTable);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     //Retrieves total meals
-    public int getTotalMeals(){
+    public int getTotalMeals() {
         return totalMeals;
     }
 
-    //Creates a table in the database
-    public void creatTable(String tableSpecs) throws SQLException {
-        Statement statement = createConnection();
-        statement.executeUpdate("CREATE TABLE " + tableSpecs);
-        //System.out.println("Creating table");
+    public List<String> getMealOptions() {
+        return mealOptions;
     }
 
     //Removes a table from the database
-    public void deleteTable(String table) throws SQLException {
-        Statement statement = createConnection();
-        statement.executeUpdate("DROP TABLE " + table);
-        System.out.println("Deleting table " + table);
+    public void deleteTables() {
+        try (Statement statement = createConnection();) {
+            statement.executeUpdate("DROP TABLE meals");
+            statement.executeUpdate("DROP TABLE ingredients");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Tables meals and ingredients deleted.");
     }
 
     @Deprecated
@@ -81,14 +100,14 @@ public class Database {
         Statement statement = createConnection();
         ResultSet lastIngredientID =
                 statement.executeQuery("SELECT MAX(ingredient_id) AS ingredient_id_max FROM ingredients");
-        while (lastIngredientID.next()){
+        while (lastIngredientID.next()) {
             totalIngredients = lastIngredientID.getInt("ingredient_id_max");
         }
     }
 
     @Deprecated
     //Adds multiple meals to the database from a List
-    public void addMultipleMealsToDatabase(List<Meal> menu) throws SQLException {
+    public void addMeals(List<Meal> menu) throws SQLException {
         Statement statement = createConnection();
         getLastMealID();
         getLastIngredientID();
@@ -96,7 +115,7 @@ public class Database {
         for (Meal meal : menu) {
             statement.executeUpdate("INSERT INTO meals VALUES ('%s', '%s', '%d')".formatted(
                     meal.getCategory(), meal.getMealName(), totalMeals));
-            for(String ingredient : meal.getIngredients()) {
+            for (String ingredient : meal.getIngredients()) {
                 statement.executeUpdate("INSERT INTO ingredients VALUES ('%s', '%d', %d)".formatted(
                         ingredient, ++totalIngredients, totalMeals));
             }
@@ -106,16 +125,20 @@ public class Database {
     }
 
     //Adds a single meal to the database
-    public void addSingleMealToDatabase(Meal meal) throws SQLException {
-        getLastMealID();
-        getLastIngredientID();
-        Statement statement = createConnection();
+    public void addMeal(Meal meal) {
+        try {
+            getLastMealID();
+            getLastIngredientID();
+            Statement statement = createConnection();
             statement.executeUpdate("INSERT INTO meals VALUES ('%s', '%s', '%d')".formatted(
                     meal.getCategory(), meal.getMealName(), ++totalMeals));
-            for(String ingredient : meal.getIngredients()) {
+            for (String ingredient : meal.getIngredients()) {
                 statement.executeUpdate("INSERT INTO ingredients VALUES ('%s', '%d', %d)".formatted(
                         ingredient, ++totalIngredients, totalMeals));
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     //Prints all meals
@@ -137,44 +160,40 @@ public class Database {
         }
     }
 
+
     //Prints meals based on a category chosen by the user
-    public void printMealsByCategory() throws SQLException {
-        System.out.println("Which category do you want to print (breakfast, lunch, dinner)?");
-        List<String> mealOptions = List.of("breakfast", "lunch", "dinner");
-        Scanner scanner = new Scanner(System.in);
-        String category = scanner.nextLine();
-        //Makes sure that the input from the user matches the available categories
-        while (!mealOptions.contains(category)) {
-            System.out.println("Wrong meal category! Choose from: breakfast, lunch, dinner.");
-            category = scanner.nextLine();
-        }
+    public void getMealsByCategory(String category) {
         //
         int numberOfResults = 0;
         //Open 2 statements one for querying the meals table and the other for the ingredients table
-        Statement statementForMeals = createConnection();
-        Statement statementForIngredients = createConnection();
-        ResultSet resultSet = statementForMeals.executeQuery(String.format(
-                "SELECT * FROM meals WHERE category = '%s'", category));
-        while (resultSet.next()) {
-            //prints Category only if this is the start of the ResultSet
-            if (numberOfResults == 0) {
-                System.out.println("Category: " + category);
+        try {
+            Statement statementForMeals = createConnection()
+            Statement statementForIngredients = createConnection();
+            ResultSet resultSet = statementForMeals.executeQuery(String.format(
+                    "SELECT * FROM meals WHERE category = '%s'", category));
+            while (resultSet.next()) {
+                //prints Category only if this is the start of the ResultSet
+                if (numberOfResults == 0) {
+                    System.out.println("Category: " + category);
+                }
+                numberOfResults++;
+                System.out.println();
+                System.out.printf("Name: %s\n",
+                        resultSet.getString("meal"));
+                //Retrieves and prints the meal's ingredients based on its meal ID
+                System.out.println("Ingredients: ");
+                ResultSet ingredients = statementForIngredients.executeQuery("SELECT * FROM ingredients WHERE meal_id = " +
+                        resultSet.getInt("meal_id"));
+                while (ingredients.next()) {
+                    System.out.println(ingredients.getString("ingredient"));
+                }
             }
-            numberOfResults++;
-            System.out.println();
-            System.out.printf("Name: %s\n",
-                    resultSet.getString("meal"));
-            //Retrieves and prints the meal's ingredients based on its meal ID
-            System.out.println("Ingredients: ");
-            ResultSet ingredients = statementForIngredients.executeQuery("SELECT * FROM ingredients WHERE meal_id = " +
-                    resultSet.getInt("meal_id"));
-            while (ingredients.next()) {
-                System.out.println(ingredients.getString("ingredient"));
-            }
-            System.out.println();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         if (numberOfResults == 0) {
             System.out.println("No meals found.");
         }
     }
+
 }
