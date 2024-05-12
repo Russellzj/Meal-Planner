@@ -8,7 +8,7 @@ public class Database implements MealDao {
     private String DB_USER = "postgres";
     private String DB_PASSWORD = "1111";
     private static final String mealsTable = "CREATE TABLE IF NOT EXISTS meals (" +
-            "category VARCHAR(10),\" +\n" +
+            "category VARCHAR(10)," +
             "meal VARCHAR(20)," +
             "meal_id INTEGER PRIMARY KEY)";
     private static final String ingredientsTable = "CREATE TABLE IF NOT EXISTS ingredients (" +
@@ -141,59 +141,67 @@ public class Database implements MealDao {
         }
     }
 
-    //Prints all meals
-    public void printAllMeals() throws SQLException {
-        Statement statementForMeals = createConnection();
-        Statement statementForIngredients = createConnection();
-        ResultSet resultSet = statementForMeals.executeQuery("SELECT * FROM meals");
-        while (resultSet.next()) {
-            System.out.printf("Category: %s\nName: %s\n",
-                    resultSet.getString("category"), resultSet.getString("meal"));
-            //Retrieves and prints the meal's ingredients based on its meal ID
-            System.out.println("Ingredients: ");
-            ResultSet ingredients = statementForIngredients.executeQuery("SELECT * FROM ingredients WHERE meal_id = " +
-                    resultSet.getInt("meal_id"));
-            while (ingredients.next()) {
-                System.out.println(ingredients.getString("ingredient"));
-            }
-            System.out.println();
-        }
-    }
-
-
-    //Prints meals based on a category chosen by the user
-    public void getMealsByCategory(String category) {
-        //
-        int numberOfResults = 0;
+    //returns a list of all the meals in the database
+    @Override
+    public List<Meal> getAllMeals() {
+        List<Meal> meals = new ArrayList<>();
         //Open 2 statements one for querying the meals table and the other for the ingredients table
         try {
-            Statement statementForMeals = createConnection()
+            Statement statementForMeals = createConnection();
             Statement statementForIngredients = createConnection();
             ResultSet resultSet = statementForMeals.executeQuery(String.format(
-                    "SELECT * FROM meals WHERE category = '%s'", category));
+                    "SELECT * FROM meals"));
             while (resultSet.next()) {
-                //prints Category only if this is the start of the ResultSet
-                if (numberOfResults == 0) {
-                    System.out.println("Category: " + category);
-                }
-                numberOfResults++;
-                System.out.println();
-                System.out.printf("Name: %s\n",
-                        resultSet.getString("meal"));
-                //Retrieves and prints the meal's ingredients based on its meal ID
-                System.out.println("Ingredients: ");
+                List<String> mealIngredients = new ArrayList<>();
+                //retrieves the ingredients of the selected meal
                 ResultSet ingredients = statementForIngredients.executeQuery("SELECT * FROM ingredients WHERE meal_id = " +
                         resultSet.getInt("meal_id"));
                 while (ingredients.next()) {
-                    System.out.println(ingredients.getString("ingredient"));
+                    mealIngredients.add(ingredients.getString("ingredient"));
                 }
+                //Creates meal from results
+                Meal meal = new Meal(
+                        resultSet.getString("category"),
+                        resultSet.getString("meal"),
+                        mealIngredients);
+
+                meals.add(meal);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        if (numberOfResults == 0) {
-            System.out.println("No meals found.");
+        return meals;
+    }
+
+    //Prints meals based on a category chosen by the user
+    public List<Meal> getMealsByCategory(String category) {
+        List<Meal> meals = new ArrayList<>();
+        //Open 2 statements one for querying the meals table and the other for the ingredients table
+        try {
+            Statement statementForMeals = createConnection();
+            Statement statementForIngredients = createConnection();
+            ResultSet resultSet = statementForMeals.executeQuery(String.format(
+                    "SELECT * FROM meals WHERE category = '%s'", category));
+            while (resultSet.next()) {
+                List<String> mealIngredients = new ArrayList<>();
+                //retrieves the ingredients of the selected meal
+                ResultSet ingredients = statementForIngredients.executeQuery("SELECT * FROM ingredients WHERE meal_id = " +
+                        resultSet.getInt("meal_id"));
+                while (ingredients.next()) {
+                    mealIngredients.add(ingredients.getString("ingredient"));
+                }
+                //Creates meal from results
+                Meal meal = new Meal(
+                        resultSet.getString("category"),
+                        resultSet.getString("meal"),
+                        mealIngredients);
+
+                meals.add(meal);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
+        return meals;
     }
 
 }

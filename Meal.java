@@ -74,6 +74,12 @@ public class Meal {
                 category, mealName, String.join("\n", ingredients));
     }
 
+    //To string method but without the category included in the string
+    public String toStringWOCategory() {
+        return String.format("Name: %s\nIngredients:\n%s",
+                mealName, String.join("\n", ingredients));
+    }
+
     public String getCategory() {
         return category;
     }

@@ -1,5 +1,6 @@
 package mealplanner;
 
+import java.util.List;
 import java.util.Scanner;
 import java.sql.*;
 
@@ -8,7 +9,7 @@ public class Main {
 
     public static void main(String[] args) throws SQLException {
         Database database = new Database();
-        //database.deleteTables();
+        database.deleteTables();
 
         boolean continueInput = true; //continues the loop as long as the user does not want to exit
 
@@ -25,12 +26,22 @@ public class Main {
                     break;
                 case "show":
                     System.out.println("Which category do you want to print (breakfast, lunch, dinner)?");
+                    //Checks user input to make sure it is part of the available options
                     String catergroy = sc.nextLine();
-                    while (!database.getMealOptions().contains(catergroyChoice)) {
+                    while (!database.getMealOptions().contains(catergroy)) {
                         System.out.println("Wrong meal category! Choose from: breakfast, lunch, dinner.");
-                        catergroy = scanner.nextLine();
+                        catergroy = sc.nextLine();
                     }
-                    database.getMealsByCategory(catergroy);
+                    List<Meal> meals = database.getMealsByCategory(catergroy);
+                    if (meals.size() == 0) {
+                        System.out.println("No meals found.");
+                    } else {
+                        System.out.println("Category: " + catergroy);
+                    }
+                    for (Meal meal : meals) {
+                        System.out.println(meal.toStringWOCategory());
+                        System.out.println();
+                    }
                     break;
                 case "exit":
                     continueInput = false;
