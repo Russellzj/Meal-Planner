@@ -7,7 +7,7 @@ import java.sql.*;
 
 public class Main {
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
         Database database = new Database();
         //database.deleteTables();
 
@@ -45,31 +45,31 @@ public class Main {
                     break;
                 case "plan":
                     database.deletePlan();
-                    for (String day : database.getDaysOfTheWeek()) {
-                        System.out.println(day);
+                    for (DaysOfTheWeek day : DaysOfTheWeek.values()) {
+                        System.out.println(day.getDay());
                         for (String category : database.getCategoryOptions()) {
                             List<Meal> mealOptions = database.getMealsByCategory(category, "meal");
                             for (Meal meal : mealOptions) {
                                 System.out.println(meal.getMealName());
                             }
-                            System.out.printf("Choose the %s for %s from the list above:\n", category, day);
+                            System.out.printf("Choose the %s for %s from the list above:\n", category, day.getDay());
                             Meal chosenMeal = null;
                             do {
                                 chosenMeal = database.getMealByName(sc.nextLine());
                                 if (chosenMeal != null) {
-                                    database.updatePlan(chosenMeal, day);
+                                    database.updatePlan(chosenMeal, day.getDay());
                                 } else {
                                     System.out.println("This meal doesn’t exist. Choose a meal from the list above.\n");
                                 }
                             } while (chosenMeal == null);
                         }
-                        System.out.printf("Yeah! We planned the meals for %s.\n\n", day);
+                        System.out.printf("Yeah! We planned the meals for %s.\n\n", day.getDay());
                     }
-                    for (String day : database.getDaysOfTheWeek()) {
-                        System.out.println("\n" + day);
+                    for (DaysOfTheWeek day : DaysOfTheWeek.values()) {
+                        System.out.println("\n" + day.getDay());
                         for (String category : database.getCategoryOptions()) {
-                            Plan plan = database.getPlanByDayAndCategory(day, category);
-                            System.out.printf("%s: %s\n", category, plan.getMealName());
+                            Plan plan = database.getPlanByDayAndCategory(day.getDay(), category);
+                            System.out.println(plan);
                         }
                     }
                     break;

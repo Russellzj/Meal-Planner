@@ -23,8 +23,6 @@ public class Database implements MealDao {
     private static final List<String> categoryOptions = List.of("breakfast", "lunch", "dinner");
     private int totalIngredients = 0;
     private int totalMeals = 0;
-    private static final List<String> daysOfTheWeek = List.of("Monday", "Tuesday", "Wednesday", "Thursday",
-            "Friday", "Saturday", "Sunday");
 
     public Database() {
         createTables();
@@ -141,10 +139,6 @@ public class Database implements MealDao {
 
     public List<String> getCategoryOptions() {
         return categoryOptions;
-    }
-
-    public List<String> getDaysOfTheWeek() {
-        return daysOfTheWeek;
     }
 
     //Removes a table from the database

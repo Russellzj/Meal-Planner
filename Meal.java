@@ -17,7 +17,6 @@ public class Meal {
         this.category = category;
         this.mealName = mealName;
         this.ingredients = ingredients;
-
     }
 
     public void addInput() {
@@ -25,18 +24,18 @@ public class Meal {
         Scanner sc = new Scanner(System.in);
 
         //Chooses meal category
-        List<String> mealOptions = List.of("breakfast", "lunch", "dinner");
+        //List<String> mealOptions = List.of("breakfast", "lunch", "dinner");
         System.out.println("Which meal do you want to add (breakfast, lunch, dinner)?");
         String mealChoice;
         //Makes sure that the category chosen is from the acceptable list mealOptions
         do {
             mealChoice = sc.nextLine().toLowerCase();
-            if (!mealOptions.contains(mealChoice)) {
+            if (!MealCategories.isCategory(mealChoice)) {
                 System.out.println("Wrong meal category! Choose from: breakfast, lunch, dinner.");
             } else {
                 category = mealChoice;
             }
-        } while (!mealOptions.contains(mealChoice));
+        } while (!MealCategories.isCategory(mealChoice));
 
         //Adds meal name to meal
         System.out.println("Input the meal's name: ");
