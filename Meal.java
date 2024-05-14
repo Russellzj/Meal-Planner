@@ -8,13 +8,16 @@ public class Meal {
     private String category;
     private String mealName;
     private List<String> ingredients;
+    private int mealId;
 
     Meal(){};
 
-    Meal(String category, String mealName, List<String> ingredients) {
+    Meal(int mealId, String category, String mealName, List<String> ingredients) {
+        this.mealId = mealId;
         this.category = category;
         this.mealName = mealName;
         this.ingredients = ingredients;
+
     }
 
     public void addInput() {
@@ -58,7 +61,7 @@ public class Meal {
                 System.out.println("Wrong format. Use letters only!");
         } while (!newIngredient.matches(regexIngredient));
 
-        String[] ingredientArray = newIngredient.split(", ");
+        String[] ingredientArray = newIngredient.split(",");
         ingredients = new ArrayList<>();
 
         for (String ingredient : ingredientArray) {
@@ -91,5 +94,7 @@ public class Meal {
     public List<String> getIngredients() {
         return ingredients;
     }
+
+    public int getMealId() { return mealId; }
 
 }
