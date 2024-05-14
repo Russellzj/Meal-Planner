@@ -1,4 +1,4 @@
-package mealplanner;
+package mealplanner.Enum;
 
 public enum DaysOfTheWeek {
     MONDAY("Monday"),

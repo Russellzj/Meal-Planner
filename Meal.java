@@ -1,5 +1,7 @@
 package mealplanner;
 
+import mealplanner.Enum.MealCategories;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -64,7 +66,7 @@ public class Meal {
         ingredients = new ArrayList<>();
 
         for (String ingredient : ingredientArray) {
-            ingredients.add(ingredient);
+            ingredients.add(ingredient.replaceFirst("^\\s*", ""));
         }
         System.out.println("The meal has been added!");
     }

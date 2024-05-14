@@ -5,7 +5,7 @@ public interface MealDao {
     void addMeal(Meal meal);
     //void updateMeal(Meal meal);
     //void deleteMeal(Meal meal);
-    void deletePlan();
+    void resetPlan();
     List<Meal> getAllMeals();
     List<Meal> getMealsByCategory(String category, String order);
     Meal getMealByName(String name);

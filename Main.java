@@ -1,8 +1,11 @@
 package mealplanner;
 
+import jdk.jfr.Category;
+import mealplanner.Enum.DaysOfTheWeek;
+import mealplanner.Enum.MealCategories;
+
 import java.util.List;
 import java.util.Scanner;
-import java.sql.*;
 
 
 public class Main {
@@ -28,7 +31,7 @@ public class Main {
                     System.out.println("Which category do you want to print (breakfast, lunch, dinner)?");
                     //Checks user input to make sure it is part of the available options
                     String catergroy = sc.nextLine();
-                    while (!database.getCategoryOptions().contains(catergroy)) {
+                    while (!MealCategories.isCategory(catergroy)) {
                         System.out.println("Wrong meal category! Choose from: breakfast, lunch, dinner.");
                         catergroy = sc.nextLine();
                     }
@@ -44,11 +47,11 @@ public class Main {
                     }
                     break;
                 case "plan":
-                    database.deletePlan();
+                    database.resetPlan();
                     for (DaysOfTheWeek day : DaysOfTheWeek.values()) {
                         System.out.println(day.getDay());
-                        for (String category : database.getCategoryOptions()) {
-                            List<Meal> mealOptions = database.getMealsByCategory(category, "meal");
+                        for (MealCategories category : MealCategories.values()) {
+                            List<Meal> mealOptions = database.getMealsByCategory(category.getCategory(), "meal");
                             for (Meal meal : mealOptions) {
                                 System.out.println(meal.getMealName());
                             }
@@ -67,8 +70,8 @@ public class Main {
                     }
                     for (DaysOfTheWeek day : DaysOfTheWeek.values()) {
                         System.out.println("\n" + day.getDay());
-                        for (String category : database.getCategoryOptions()) {
-                            Plan plan = database.getPlanByDayAndCategory(day.getDay(), category);
+                        for (MealCategories category : MealCategories.values()) {
+                            Plan plan = database.getPlanByDayAndCategory(day.getDay(), category.getCategory());
                             System.out.println(plan);
                         }
                     }

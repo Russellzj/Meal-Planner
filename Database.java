@@ -6,8 +6,8 @@ import java.sql.*;
 
 public class Database implements MealDao {
     private static final String DB_URL = "jdbc:postgresql:meals_db";
-    private String DB_USER = "postgres";
-    private String DB_PASSWORD = "1111";
+    private final String DB_USER = "postgres";
+    private final String DB_PASSWORD = "1111";
     private static final String mealsTable = "CREATE TABLE IF NOT EXISTS meals (" +
             "category VARCHAR(10)," +
             "meal VARCHAR(20)," +
@@ -20,9 +20,6 @@ public class Database implements MealDao {
             "day VARCHAR(10)," +
             "meal_category VARCHAR(10)," +
             "meal_id INTEGER)";
-    private static final List<String> categoryOptions = List.of("breakfast", "lunch", "dinner");
-    private int totalIngredients = 0;
-    private int totalMeals = 0;
 
     public Database() {
         createTables();
@@ -31,20 +28,44 @@ public class Database implements MealDao {
     //Creates connection to the database
     private Statement createConnection() throws SQLException {
         Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-        connection.setAutoCommit(true);
         Statement stmt = connection.createStatement();
         return stmt;
     }
 
-    private List<Meal> selectMeals(String query)  {
+    private void runDatabase (String command) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            Statement stmt = connection.createStatement();
+            stmt.execute(command);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //Creates a table in the database
+    private void createTables() {
+        runDatabase(mealsTable);
+        runDatabase(ingredientsTable);
+        runDatabase(planTable);
+    }
+
+    //Removes a table from the database
+    public void deleteTables() {
+        runDatabase("DROP TABLE meals");
+        runDatabase("DROP TABLE ingredients");
+        System.out.println("Tables meals and ingredients deleted.");
+    }
+
+    //Deletes and recreates plan table
+    public void resetPlan() {
+        runDatabase("DROP TABLE plan");
+        runDatabase(planTable);
+    }
+
+    private List<Meal> queryMeals(String query) {
         List<Meal> meals = new ArrayList<>();
-        Connection connection = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery("SELECT * FROM meals WHERE " + query);
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM meals " + query);
             while (rs.next()) {
                 Meal meal = new Meal(
                         rs.getInt("meal_id"),
@@ -55,56 +76,42 @@ public class Database implements MealDao {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try { rs.close();} catch (SQLException e) {}
-            try { stmt.close();} catch (SQLException e) {}
-            try { connection.close();} catch (SQLException e) {}
         }
         return meals;
     }
 
-    private Meal selectMeal(String query)  {
+    private Meal queryMealsSingleResult(String query) {
         Meal meal = null;
-        Connection connection = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        int resultCount = 0;
-        try {
-            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery("SELECT * FROM meals WHERE " + query);
+        int results = 0;
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM meals " + query);
             while (rs.next()) {
-                resultCount++;
                 meal = new Meal(
                         rs.getInt("meal_id"),
                         rs.getString("category"),
                         rs.getString("meal"),
                         getIngredientsByMealId(rs.getInt("meal_id")));
+                results++;
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try { rs.close();} catch (SQLException e) {}
-            try { stmt.close();} catch (SQLException e) {}
-            try { connection.close();} catch (SQLException e) {}
         }
-        if (resultCount > 1) {
-            throw new RuntimeException();
+        if (results > 1) {
+            throw new RuntimeException("There were more than one meals returned.");
         }
         return meal;
     }
 
-    private Plan selectPlan(String query)  {
+
+
+    private Plan queryPlan(String query)  {
         Plan plan = null;
-        Connection connection = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery("SELECT * FROM plan WHERE " + query);
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)){
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM plan WHERE " + query);
             while (rs.next()) {
-                Meal meal = selectMeal("meal_id = %d".formatted(rs.getInt("meal_id")));
+                Meal meal = queryMealsSingleResult("WHERE meal_id = %d".formatted(rs.getInt("meal_id")));
                 plan = new Plan(
                         rs.getString("day"),
                         rs.getInt("meal_id"),
@@ -113,131 +120,50 @@ public class Database implements MealDao {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try { rs.close();} catch (SQLException e) {}
-            try { stmt.close();} catch (SQLException e) {}
-            try { connection.close();} catch (SQLException e) {}
         }
         return plan;
     }
 
-    //Creates a table in the database
-    public void createTables() {
-        try (Statement statement = createConnection()) {
-            statement.executeUpdate(mealsTable);
-            statement.executeUpdate(ingredientsTable);
-            statement.executeUpdate(planTable);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    //Retrieves total meals
-    public int getTotalMeals() {
-        return totalMeals;
-    }
-
-    public List<String> getCategoryOptions() {
-        return categoryOptions;
-    }
-
-    //Removes a table from the database
-    public void deleteTables() {
-        try (Statement statement = createConnection();) {
-            statement.executeUpdate("DROP TABLE meals");
-            statement.executeUpdate("DROP TABLE ingredients");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Tables meals and ingredients deleted.");
-    }
-
-    public void deletePlan() {
-        try (Statement statement = createConnection()) {
-            statement.execute("DROP TABLE plan");
-            statement.executeUpdate(planTable);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Deprecated
-    public List<String> getIngredientList(int meal_id) throws SQLException {
-        List<String> ingredientList = new ArrayList<>();
-        Statement statement = createConnection();
-        ResultSet ingredients = statement.executeQuery("SELECT * FROM ingredients WHERE meal_id = " + meal_id);
-        while (ingredients.next()) {
-            ingredientList.add(ingredients.getString("ingredient"));
-        }
-        return ingredientList;
-    }
-
-    @Deprecated
-    public List<Meal> getMeals() throws SQLException {
-        List<Meal> menu = new ArrayList<>();
-        Statement statement = createConnection();
-        ResultSet meals = statement.executeQuery("SELECT * FROM meals");
-        while (meals.next()) {
-            Meal newMeal = new Meal(meals.getInt("meal_id"), meals.getString("category"),
-                    meals.getString("meal"), getIngredientList(meals.getInt("meal_id")));
-            menu.add(newMeal);
-        }
-        return menu;
-    }
-
     //Retrieves the highest value used from meals - Used mainly for creating the primary key
-    public void getLastMealID() throws SQLException {
-        Statement statement = createConnection();
-        ResultSet lastMealID =
-                statement.executeQuery("SELECT MAX(meal_id) AS meal_id_max FROM meals");
-        while (lastMealID.next()) {
-            totalMeals = lastMealID.getInt("meal_id_max");
+    public int getLastMealID() {
+        int lastID = 0;
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT MAX(meal_id) AS meal_id_max FROM meals");
+            while (rs.next()) {
+                lastID = rs.getInt("meal_id_max");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        return lastID;
     }
 
     //Retrieves the highest value used from ingredients - Used mainly for creating the primary key
-    public void getLastIngredientID() throws SQLException {
-        Statement statement = createConnection();
-        ResultSet lastIngredientID =
-                statement.executeQuery("SELECT MAX(ingredient_id) AS ingredient_id_max FROM ingredients");
-        while (lastIngredientID.next()) {
-            totalIngredients = lastIngredientID.getInt("ingredient_id_max");
-        }
-    }
-
-    @Deprecated
-    //Adds multiple meals to the database from a List
-    public void addMeals(List<Meal> menu) throws SQLException {
-        Statement statement = createConnection();
-        getLastMealID();
-        getLastIngredientID();
-        totalMeals++;
-        for (Meal meal : menu) {
-            statement.executeUpdate("INSERT INTO meals VALUES ('%s', '%s', '%d')".formatted(
-                    meal.getCategory(), meal.getMealName(), totalMeals));
-            for (String ingredient : meal.getIngredients()) {
-                statement.executeUpdate("INSERT INTO ingredients VALUES ('%s', '%d', %d)".formatted(
-                        ingredient, ++totalIngredients, totalMeals));
-            }
-            totalMeals++;
-
-        }
-    }
-
-    //Adds a single meal to the database
-    public void addMeal(Meal meal) {
-        try {
-            getLastMealID();
-            getLastIngredientID();
-            Statement statement = createConnection();
-            statement.executeUpdate("INSERT INTO meals VALUES ('%s', '%s', '%d')".formatted(
-                    meal.getCategory(), meal.getMealName(), ++totalMeals));
-            for (String ingredient : meal.getIngredients()) {
-                statement.executeUpdate("INSERT INTO ingredients VALUES ('%s', '%d', %d)".formatted(
-                        ingredient, ++totalIngredients, totalMeals));
+    public int getLastIngredientID() {
+        int lastIngredientID = 0;
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            Statement stmt = connection.createStatement();
+            ResultSet rs =
+                    stmt.executeQuery("SELECT MAX(ingredient_id) AS ingredient_id_max FROM ingredients");
+            while (rs.next()) {
+                lastIngredientID = rs.getInt("ingredient_id_max");
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+        return lastIngredientID;
+    }
+
+    //Adds a meal to the database including its ingredients
+    public void addMeal(Meal meal) {
+        int lastIngredientId = getLastIngredientID();
+        int lastMealId = getLastMealID();
+        runDatabase("INSERT INTO meals VALUES ('%s', '%s', '%d')".formatted(
+                meal.getCategory(), meal.getMealName(), ++lastMealId));
+        for (String ingredient : meal.getIngredients()) {
+            runDatabase("INSERT INTO ingredients VALUES ('%s', '%d', %d)".formatted(
+                    ingredient, ++lastIngredientId, lastMealId));
         }
     }
 
@@ -245,32 +171,7 @@ public class Database implements MealDao {
     @Override
     public List<Meal> getAllMeals() {
         List<Meal> meals = new ArrayList<>();
-        //Open 2 statements one for querying the meals table and the other for the ingredients table
-        try {
-            Statement statementForMeals = createConnection();
-            Statement statementForIngredients = createConnection();
-            ResultSet resultSet = statementForMeals.executeQuery(String.format(
-                    "SELECT * FROM meals"));
-            while (resultSet.next()) {
-                List<String> mealIngredients = new ArrayList<>();
-                //retrieves the ingredients of the selected meal
-                ResultSet ingredients = statementForIngredients.executeQuery("SELECT * FROM ingredients WHERE meal_id = " +
-                        resultSet.getInt("meal_id"));
-                while (ingredients.next()) {
-                    mealIngredients.add(ingredients.getString("ingredient"));
-                }
-                //Creates meal from results
-                Meal meal = new Meal(
-                        resultSet.getInt("meal_id"),
-                        resultSet.getString("category"),
-                        resultSet.getString("meal"),
-                        mealIngredients);
-
-                meals.add(meal);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        meals = queryMeals("");
         return meals;
     }
 
@@ -278,53 +179,21 @@ public class Database implements MealDao {
     public List<Meal> getMealsByCategory(String category, String order) {
         List<Meal> meals = new ArrayList<>();
         //Open 2 statements one for querying the meals table and the other for the ingredients table
-        String query = "category = '%s' ORDER BY %s".formatted(category, order);
-        meals = selectMeals(query);
+        String query = "WHERE category = '%s' ORDER BY %s".formatted(category, order);
+        meals = queryMeals(query);
         return meals;
     }
 
 
 
-    //retrieves
+    //retrieves meal by meal name
     public Meal getMealByName(String mealName) {
-        Meal meal = null;
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery(String.format("SELECT * FROM meals WHERE meal = '%s'", mealName));
-            while (rs.next()) {
-                meal = new Meal(
-                        rs.getInt("meal_id"),
-                        rs.getString("category"),
-                        rs.getString("meal"),
-                        getIngredientsByMealId(rs.getInt("meal_id")));
-            } connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return meal;
-    }
-
-    public Meal getMealById(int mealId) {
-        Meal meal = null;
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT * FROM meals WHERE meal_id = '%s'".formatted(mealId));
-            while (rs.next()) {
-                meal = new Meal(rs.getInt("meal_id"),
-                        rs.getString("category"),
-                        rs.getString("meal"),
-                        getIngredientsByMealId(rs.getInt("meal_id")));
-            }
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } return meal;
+        return queryMealsSingleResult("WHERE meal = '%s'".formatted(mealName));
     }
 
     public Plan getPlanByDayAndCategory(String day, String category){
         Plan plan = null;
-        plan = selectPlan("day = '%s' AND meal_category = '%s'".formatted(day, category));
+        plan = queryPlan("day = '%s' AND meal_category = '%s'".formatted(day, category));
         return plan;
     }
 
@@ -344,18 +213,7 @@ public class Database implements MealDao {
     }
 
     public void updatePlan(Meal meal, String day) {
-        Connection connection = null;
-        Statement stmt = null;
-        try {
-            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            stmt = connection.createStatement();
-            stmt.executeUpdate("INSERT INTO plan VALUES ('%s', '%s', '%d')".formatted(
-                    day, meal.getCategory(), meal.getMealId()));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
-            try { connection.close(); } catch (SQLException e) { e.printStackTrace(); }
-        }
+        runDatabase("INSERT INTO plan VALUES ('%s', '%s', '%d')".formatted(
+                day, meal.getCategory(), meal.getMealId()));
     }
 }

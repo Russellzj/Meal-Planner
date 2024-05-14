@@ -1,4 +1,4 @@
-package mealplanner;
+package mealplanner.Enum;
 
 public enum MealCategories {
     BREAKFAST("breakfast"),
