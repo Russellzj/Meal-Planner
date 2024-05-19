@@ -58,7 +58,7 @@ public class Main {
                             System.out.printf("Choose the %s for %s from the list above:\n", category, day.getDay());
                             Meal chosenMeal = null;
                             do {
-                                chosenMeal = database.getMealByName(sc.nextLine());
+                                chosenMeal = database.getMealByNameAndCategory(sc.nextLine(), category.getCategory());
                                 if (chosenMeal != null) {
                                     database.updatePlan(chosenMeal, day.getDay());
                                 } else {

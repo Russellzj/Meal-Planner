@@ -25,13 +25,6 @@ public class Database implements MealDao {
         createTables();
     }
 
-    //Creates connection to the database
-    private Statement createConnection() throws SQLException {
-        Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-        Statement stmt = connection.createStatement();
-        return stmt;
-    }
-
     private void runDatabase (String command) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             Statement stmt = connection.createStatement();
@@ -187,8 +180,9 @@ public class Database implements MealDao {
 
 
     //retrieves meal by meal name
-    public Meal getMealByName(String mealName) {
-        return queryMealsSingleResult("WHERE meal = '%s'".formatted(mealName));
+    public Meal getMealByNameAndCategory(String name, String category) {
+        return queryMealsSingleResult("WHERE meal = '%s' AND category = '%s'"
+                .formatted(name, category));
     }
 
     public Plan getPlanByDayAndCategory(String day, String category){
@@ -200,9 +194,10 @@ public class Database implements MealDao {
     @Override
     public List<String> getIngredientsByMealId(int mealId) {
         List<String> ingredients = new ArrayList<>();
-        try (Statement statement = createConnection()) {
-            ResultSet rs = statement.executeQuery(String.format("SELECT * FROM ingredients WHERE meal_id = '%s'",
-                    mealId));
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM ingredients WHERE meal_id = '%s'"
+                    .formatted(mealId));
             while (rs.next()) {
                 ingredients.add(rs.getString("ingredient"));
             }
