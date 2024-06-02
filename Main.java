@@ -48,13 +48,8 @@ public class Main {
                     break;
                 case "plan":
                     List<Plan> plans = Plan.createPlan();
+                    Plan.printPlans(plans);
                     database.insertCompletePlan(plans);
-                    for (int i =0 ; i < DaysOfTheWeek.values().length ; i++) {
-                        System.out.println(DaysOfTheWeek.values()[i].toString());
-                        for (int j = i * 3; j < MealCategories.values().length + i * 3; j++) {
-                            System.out.println(plans.get(j));
-                        }
-                    }
                     break;
                 case "exit":
                     continueInput = false;

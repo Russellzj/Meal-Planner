@@ -64,6 +64,18 @@ public class Plan {
         }
         return plans;
     }
+
+    public static void printPlans(List<Plan> plans) {
+        String day = "";
+        for (Plan plan : plans) {
+            if (!plan.getDay().equals(day)) {
+                day = plan.getDay();
+                System.out.println(day);
+            }
+            System.out.println(plan);
+        }
+
+    }
 }
 
 
