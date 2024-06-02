@@ -7,8 +7,11 @@ import mealplanner.Enum.MealCategories;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.HashMap;
 
 
 public class Main {
@@ -54,17 +57,37 @@ public class Main {
                     database.insertCompletePlan(plans);
                     break;
                 case "save":
+                    //Saved Plan from DB
                     List<Plan> plansToSave = database.getAllPlans();
                     if (plansToSave.size() == 0) {
                         System.out.println("Unable to save. Plan your meals first.");
                         break;
                     }
-                    System.out.println("Input a filename.");
+                    //Name of the ingredient followed by the amount
+                    Map<String, Integer> ingredients = new HashMap<>();
+
+                    for (Plan plan : plansToSave) {
+                        for (String ingredient : database.getIngredientsByMealId(plan.getMealId())) {
+                            if (!ingredients.containsKey(ingredient))
+                                ingredients.put(ingredient, 1);
+                            else
+                                ingredients.put(ingredient, ingredients.get(ingredient) + 1);
+                        }
+                    }
+                    //Creates File
+                    System.out.println("Input a filename:");
                     String filename = sc.nextLine();
                     File exportedFile = new File(filename);
-                    try {
-                        FileWriter writer = new FileWriter(exportedFile);
-                        writer.write("test string");
+                    try (PrintWriter printWriter = new PrintWriter(new FileWriter(exportedFile))){
+                        for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
+                            printWriter.print(entry.getKey());
+                            Integer amount = entry.getValue();
+                            if (entry.getValue() > 1) {
+                                printWriter.print(" x" + amount);
+                            }
+                            printWriter.println();
+                        }
+                        System.out.println("Saved!");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
