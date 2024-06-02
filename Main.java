@@ -47,32 +47,12 @@ public class Main {
                     }
                     break;
                 case "plan":
-                    database.resetPlan();
-                    for (DaysOfTheWeek day : DaysOfTheWeek.values()) {
-                        System.out.println(day.getDay());
-                        for (MealCategories category : MealCategories.values()) {
-                            List<Meal> mealOptions = database.getMealsByCategory(category.getCategory(), "meal");
-                            for (Meal meal : mealOptions) {
-                                System.out.println(meal.getMealName());
-                            }
-                            System.out.printf("Choose the %s for %s from the list above:\n", category, day.getDay());
-                            Meal chosenMeal = null;
-                            do {
-                                chosenMeal = database.getMealByNameAndCategory(sc.nextLine(), category.getCategory());
-                                if (chosenMeal != null) {
-                                    database.updatePlan(chosenMeal, day.getDay());
-                                } else {
-                                    System.out.println("This meal doesn’t exist. Choose a meal from the list above.\n");
-                                }
-                            } while (chosenMeal == null);
-                        }
-                        System.out.printf("Yeah! We planned the meals for %s.\n\n", day.getDay());
-                    }
-                    for (DaysOfTheWeek day : DaysOfTheWeek.values()) {
-                        System.out.println("\n" + day.getDay());
-                        for (MealCategories category : MealCategories.values()) {
-                            Plan plan = database.getPlanByDayAndCategory(day.getDay(), category.getCategory());
-                            System.out.println(plan);
+                    List<Plan> plans = Plan.createPlan();
+                    database.insertCompletePlan(plans);
+                    for (int i =0 ; i < DaysOfTheWeek.values().length ; i++) {
+                        System.out.println(DaysOfTheWeek.values()[i].toString());
+                        for (int j = i * 3; j < MealCategories.values().length + i * 3; j++) {
+                            System.out.println(plans.get(j));
                         }
                     }
                     break;

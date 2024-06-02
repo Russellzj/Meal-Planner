@@ -6,8 +6,8 @@ import java.sql.*;
 
 public class Database implements MealDao {
     private static final String DB_URL = "jdbc:postgresql:meals_db";
-    private final String DB_USER = "postgres";
-    private final String DB_PASSWORD = "1111";
+    private static final String DB_USER = "postgres";
+    private static final String DB_PASSWORD = "1111";
     private static final String mealsTable = "CREATE TABLE IF NOT EXISTS meals (" +
             "category VARCHAR(10)," +
             "meal VARCHAR(20)," +
@@ -107,8 +107,8 @@ public class Database implements MealDao {
                 Meal meal = queryMealsSingleResult("WHERE meal_id = %d".formatted(rs.getInt("meal_id")));
                 plan = new Plan(
                         rs.getString("day"),
-                        rs.getInt("meal_id"),
                         rs.getString("meal_category"),
+                        rs.getInt("meal_id"),
                         meal.getMealName());
             }
         } catch (SQLException e) {
@@ -211,4 +211,30 @@ public class Database implements MealDao {
         runDatabase("INSERT INTO plan VALUES ('%s', '%s', '%d')".formatted(
                 day, meal.getCategory(), meal.getMealId()));
     }
+
+    public void insertCompletePlan(List<Plan> plans) {
+        resetPlan();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String insert = "INSERT INTO plan (day, meal_category, meal_id) VALUES (?, ?, ?)";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(insert)) {
+                for (Plan plan : plans) {
+                    preparedStatement.setString(1, plan.getDay());
+                    preparedStatement.setString(2, plan.getMealCategory());
+                    preparedStatement.setInt(3, plan.getMealId());
+                    preparedStatement.addBatch();
+                }
+
+                preparedStatement.executeBatch();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void printPlanDatabase() {
+
+    }
+
 }
