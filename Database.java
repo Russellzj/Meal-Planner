@@ -102,7 +102,7 @@ public class Database implements MealDao {
         Plan plan = null;
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)){
             Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM plan WHERE " + query);
+            ResultSet rs = stmt.executeQuery("SELECT * FROM plan " + query);
             while (rs.next()) {
                 Meal meal = queryMealsSingleResult("WHERE meal_id = %d".formatted(rs.getInt("meal_id")));
                 plan = new Plan(
@@ -185,9 +185,26 @@ public class Database implements MealDao {
                 .formatted(name, category));
     }
 
+    public List<Plan> getAllPlans() {
+        List<Plan> plans = new ArrayList<>();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM plan");
+            while (rs.next()) {
+                plans.add(new Plan(
+                        rs.getString("day"),
+                        rs.getString("meal_category"),
+                        rs.getInt("meal_id")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return plans;
+    }
+
     public Plan getPlanByDayAndCategory(String day, String category){
         Plan plan = null;
-        plan = queryPlan("day = '%s' AND meal_category = '%s'".formatted(day, category));
+        plan = queryPlan("WHERE day = '%s' AND meal_category = '%s'".formatted(day, category));
         return plan;
     }
 
@@ -223,7 +240,6 @@ public class Database implements MealDao {
                     preparedStatement.setInt(3, plan.getMealId());
                     preparedStatement.addBatch();
                 }
-
                 preparedStatement.executeBatch();
             } catch (SQLException e) {
                 e.printStackTrace();
