@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class Plan {
     private final int mealId;
     private final String day;
-    private final String mealName;
+    private String mealName;
     private final String mealCategory;
 
 
@@ -21,7 +21,12 @@ public class Plan {
         this.mealCategory = mealCategory;
         this.mealId = mealId;
         this.mealName = mealName;
+    }
 
+    Plan(String day, String mealCategory, int mealId) {
+        this.day = day;
+        this.mealCategory = mealCategory;
+        this.mealId = mealId;
     }
 
     public void setPlan() {
@@ -40,6 +45,7 @@ public class Plan {
         return ("%s: %s").formatted(category, mealName);
     }
 
+    //creates an ArrayList of Plan Objects to create an entire weeks worth of meals
     public static List<Plan> createPlan() {
         List<Plan> plans = new ArrayList<Plan>();
         Database db = new Database();
@@ -65,6 +71,7 @@ public class Plan {
         return plans;
     }
 
+    //Prints an entire weeks worth of plans
     public static void printPlans(List<Plan> plans) {
         String day = "";
         for (Plan plan : plans) {
