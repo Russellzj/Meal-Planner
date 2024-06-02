@@ -22,11 +22,8 @@ public class Meal {
     }
 
     public void addInput() {
-
         Scanner sc = new Scanner(System.in);
-
         //Chooses meal category
-        //List<String> mealOptions = List.of("breakfast", "lunch", "dinner");
         System.out.println("Which meal do you want to add (breakfast, lunch, dinner)?");
         String mealChoice;
         //Makes sure that the category chosen is from the acceptable list mealOptions
