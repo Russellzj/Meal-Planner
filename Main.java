@@ -4,6 +4,9 @@ import jdk.jfr.Category;
 import mealplanner.Enum.DaysOfTheWeek;
 import mealplanner.Enum.MealCategories;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,10 +18,9 @@ public class Main {
         //database.deleteTables();
 
         boolean continueInput = true; //continues the loop as long as the user does not want to exit
-
         while (continueInput) {
             Scanner sc = new Scanner(System.in);
-            System.out.println("What would you like to do (add, show, plan, exit)?");
+            System.out.println("What would you like to do (add, show, plan, save, exit)?");
             String userCommand  = sc.nextLine();
             switch (userCommand) {
                 //Adds Meal to the menu
@@ -50,6 +52,23 @@ public class Main {
                     List<Plan> plans = Plan.createPlan();
                     Plan.printPlans(plans);
                     database.insertCompletePlan(plans);
+                    break;
+                case "save":
+                    List<Plan> plansToSave = database.getAllPlans();
+                    if (plansToSave.size() == 0) {
+                        System.out.println("Unable to save. Plan your meals first.");
+                        break;
+                    }
+                    System.out.println("Input a filename.");
+                    String filename = sc.nextLine();
+                    File exportedFile = new File(filename);
+                    try {
+                        FileWriter writer = new FileWriter(exportedFile);
+                        writer.write("test string");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     break;
                 case "exit":
                     continueInput = false;
