@@ -74,15 +74,15 @@ public class Main {
                                 ingredients.put(ingredient, ingredients.get(ingredient) + 1);
                         }
                     }
-                    //Creates File
+                    //Create file and insert all ingredients with their amount
                     System.out.println("Input a filename:");
                     String filename = sc.nextLine();
                     File exportedFile = new File(filename);
                     try (PrintWriter printWriter = new PrintWriter(new FileWriter(exportedFile))){
-                        for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
-                            printWriter.print(entry.getKey());
-                            Integer amount = entry.getValue();
-                            if (entry.getValue() > 1) {
+                        for (Map.Entry<String, Integer> ingredient : ingredients.entrySet()) {
+                            printWriter.print(ingredient.getKey());
+                            Integer amount = ingredient.getValue();
+                            if (ingredient.getValue() > 1) {
                                 printWriter.print(" x" + amount);
                             }
                             printWriter.println();
@@ -97,7 +97,7 @@ public class Main {
                     continueInput = false;
                     break;
                 default:
-                    //System.out.println("Invalid command");
+                    System.out.println("Invalid command");
             }
         }
         System.out.println("Bye!");
